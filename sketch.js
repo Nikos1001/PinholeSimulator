@@ -11,6 +11,7 @@ let b = 0.1;
 let prevMillis = 0;
 
 let apertureSlider, targetXSlider, objectXSlider, objectHSlider, brightnessSlider;
+let imageSelector;
 
 function setup() {
     let cnv = createCanvas(600, 400);
@@ -21,12 +22,18 @@ function setup() {
     objectHSlider = createSlider(50, 300, 200);
     brightnessSlider = createSlider(0, 1, 0.1, 0.01);
 
+    imageSelector = createSelect();
+    imageSelector.option('Red and Green');
+    imageSelector.option('Grayscale');
+    imageSelector.option('Rainbow');
+
     cnv.parent(document.getElementById('canvas-container'));
     apertureSlider.parent(document.getElementById('aperture-slider'));
     objectXSlider.parent(document.getElementById('obj-x-slider'));
     objectHSlider.parent(document.getElementById('obj-h-slider'));
     targetXSlider.parent(document.getElementById('wall-x-slider'));
     brightnessSlider.parent(document.getElementById('brightness-slider'));
+    imageSelector.parent(document.getElementById('image-select'))
 }
 
 let img;
@@ -111,6 +118,42 @@ function getAngle(y) {
 }
 
 function getObjectColor(y) {
-    if(y < 0.5) return [255, 0, 0];
-    else return [0, 255, 0];
+    if(imageSelector.value() === 'Red and Green') {
+        if(y < 0.5) return [255, 0, 0];
+        else return [0, 255, 0];
+    }
+    if(imageSelector.value() == 'Grayscale') {
+        return [255 * y, 255 * y, 255 * y];
+    }
+    if(imageSelector.value() == 'Rainbow') {
+        let rgb = HSVtoRGB(y, 1, 1);
+        return [rgb.r, rgb.g, rgb.b];
+    }
+
+    return [0, 0, 0];
+}
+
+function HSVtoRGB(h, s, v) {
+    var r, g, b, i, f, p, q, t;
+    if (arguments.length === 1) {
+        s = h.s, v = h.v, h = h.h;
+    }
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+    return {
+        r: Math.round(r * 255),
+        g: Math.round(g * 255),
+        b: Math.round(b * 255)
+    };
 }
